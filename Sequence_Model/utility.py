@@ -29,6 +29,10 @@ import pandas as pd
 from shift_orgin import *
 from load_model_gpu import *
 import time
+import shutil
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from threading import Lock
+from collections import defaultdict
 if torch.cuda.is_available():  
     device = "cuda" 
 else:  
@@ -315,27 +319,7 @@ class Vector_models():
         predictions_list = list(predictions_dict.values())
         return predictions_list
 
-"""def left_hand_features(test_loader , input_dim, hidden_dim, output_dim,file_name):
-    # print(file_name)
-    # model = FeedforwardNeuralNetModelLeftHand(input_dim*2, hidden_dim, output_dim,dropout_prob = 0.5)
-    model.to(device)
-    
-    # criterion = nn.CrossEntropyLoss()
-    # model_{file_name}.load_state_dict(torch.load(f'/4TBHD/ISL/CodeBase/Model_Dir/vector_models/left_v1/{file_name}.h5'))
-    model = getattr(self, file_name)
-    predictions_dict = model_prediction(model,test_loader)
-    predictions_list = list(predictions_dict.values())
-    return predictions_list
 
-def two_hands_features(test_loader,model,file_name ):# input_dim, hidden_dim, output_dim,file_name):
-    # model = FeedforwardNeuralNetModelLeftHand(input_dim, hidden_dim, output_dim,dropout_prob = 0.5)
-    model.to(device)
-    # criterion = nn.CrossEntropyLoss()
-    model.load_state_dict(torch.load(f'/4TBHD/ISL/CodeBase/Model_Dir/vector_models/two_hands_v1/{file_name}.h5'))
-    predictions_dict = model_prediction(model,test_loader)
-    predictions_list = list(predictions_dict.values())
-    return predictions_list
-"""
 
 
 def read_config(config_file):
@@ -590,248 +574,56 @@ def construct_seq_dictionary(config,classification_dict,dataset_size,shift_orgin
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-"""
-def construct_seq_dictionary(config,classification_dict,dataset_size,save_path = 'seq_ip_data.pkl'):
-
-    # models = [model_right_arm_folded, model_right_forearm_orientation, model_right_hand_position_along_body,model_right_elbow_orientation,model_right_palm_position,model_right_fingers_joined,
-    #           model_rigconstructht_finger_orientation,model_right_finger_closeness_to_face,model_hands_involved,model_joined_hand_orientation,model_relative_hand_height,model_hand_synchronization]
-construct
-    # # Initialize the MultiModelInference class
-    # multi_inference = MultiModelInference(models)
-
-    # # # Load all models to the GPU
-    # multi_inference.load_all_models()
-construct
-    # loop here for every image
-    init_vector_models = Vector_models()
-    feature_list,img_path=[],[]
-    for vid in tqdm(classification_dict.keys()):
-        vector_list = []
-        path_list = []
-        for img_idx in range(len(classification_dict[vid])):
-        # print("length of classification_dict",len(classification_dict))
-            path = classification_dict[vid][img_idx].replace('onlyface','keypoints').replace('jpg','npy')
-            
-
-            keypoint = np.load(path).reshape(1,-1)
-            #-----------------# 
-            left_arm_folded_list = dynamic_npy_read(init_vector_models,path,'left_arm_folded',config)
-            left_forearm_orientation_list = dynamic_npy_read(init_vector_models,path,'left_forearm_orientation',config)
-            left_elbow_orientation_list = dynamic_npy_read(init_vector_models,path,'left_elbow_orientation',config)
-            left_hand_position_along_body_list = dynamic_npy_read(init_vector_models,path,'left_hand_position_along_body',config)
-            left_fingertips_orientation_list = dynamic_npy_read(init_vector_models,path,'left_fingertips_orientation',config)
-            left_palm_position_list = dynamic_npy_read(init_vector_models,path,'left_palm_position',config)
-            left_fingers_joined_list = dynamic_npy_read(init_vector_models,path,'left_fingers_joined',config)
-            left_fingers_closeness_to_face_list = dynamic_npy_read(init_vector_models,path,'left_fingers_closeness_to_face',config)
-
-            # left_arm_folded_tensor = torch.tensor(left_arm_folded_keypoint, dtype=torch.float32)
-            # left_forearm_orientation_tensor = torch.tensor(left_forearm_orientation_keypoint, dtype=torch.float32)
-            # left_elbow_orientation_tensor = torch.tensor(left_elbow_orientation_keypoint, dtype=torch.float32)
-            # left_hand_position_along_body_tensor = torch.tensor(left_hand_position_along_body_keypoint, dtype=torch.float32)
-            # left_fingertips_orientation_tensor = torch.tensor(left_fingertips_orientation_keypoint, dtype=torch.float32)
-            # left_palm_position_tensor = torch.tensor(left_palm_position_keypoint, dtype=torch.float32)
-            # left_fingers_joined_tensor = torch.tensor(left_fingers_joined_keypoint, dtype=torch.float32)
-            # left_fingers_closeness_to_face_tensor = torch.tensor(left_fingers_closeness_to_face_keypoint, dtype=torch.float32)
-
-
-            #-----------------#
-
-            z_tensor = torch.tensor(keypoint, dtype=torch.float32)
-            test_data = torch.utils.data.TensorDataset(z_tensor)
-            test_loader = torch.utils.data.DataLoader(test_data, 1, shuffle=False)
-            
-            right_arm_folded_list = init_vector_models.model_predict("right_arm_folded", test_loader)
-            right_forearm_orientation_list = init_vector_models.model_predict("right_forearm_orientation", test_loader)
-            right_elbow_orientation_list = init_vector_models.model_predict("right_elbow_orientation", test_loader)
-            right_hand_position_along_body_list = init_vector_models.model_predict("right_hand_position_along_body", test_loader)
-            right_fingertips_orientation_list = init_vector_models.model_predict("right_fingertips_orientation", test_loader)
-            right_palm_position_list = init_vector_models.model_predict("right_palm_position", test_loader)
-            right_fingers_joined_list = init_vector_models.model_predict("right_fingers_joined", test_loader)
-            right_finger_closeness_to_face_list = init_vector_models.model_predict("right_finger_closeness_to_face", test_loader)
-            hands_involved_list = init_vector_models.model_predict("hands_involved", test_loader)
-            joined_hand_orientation_list = init_vector_models.model_predict("joined_hand_orientation", test_loader)
-            relative_hand_height_list = init_vector_models.model_predict("relative_hand_height", test_loader)
-            hand_synchronization_list = init_vector_models.model_predict("hand_synchronization", test_loader)
-
-            # right_arm_folded_list = right_arm_folded(test_loader,model_right_arm_folded) #input_dim,hidden_dim,config['output_dim_mapping']["right_arm_folded"])
-            # right_forearm_orientation_list = right_forearm_orientation(test_loader,model_right_forearm_orientation) #input_dim,hidden_dim,config['output_dim_mapping']["right_forearm_orientation"])
-            # right_hand_position_along_body_list = right_hand_position_along_body(test_loader,model_right_hand_position_along_body)#input_dim,hidden_dim,config['output_dim_mapping']["right_hand_position_along_body"])
-            # right_elbow_orientation_list = right_elbow_orientation(test_loader,model_right_elbow_orientation)#input_dim,hidden_dim,config['output_dim_mapping']["right_elbow_orientation"])
-            # right_palm_position_list = right_palm_position(test_loader,model_right_palm_position)#input_dim,hidden_dim,config['output_dim_mapping']["right_palm_position"])
-            # right_fingers_joined_list = right_fingers_joined(test_loader,model_right_fingers_joined)#input_dim,hidden_dim,config['output_dim_mapping']["right_fingers_joined"])
-            # right_finger_orientation_list = right_finger_orientation(test_loader,model_right_finger_orientation)#input_dim,hidden_dim,config['output_dim_mapping']["right_finger_orientation"])
-            # right_finger_closeness_to_face_list = right_finger_closeness_to_face(test_loader,model_right_finger_closeness_to_face)#input_dim,hidden_dim,config['output_dim_mapping']["right_finger_closeness_to_face"])
-            
-            # hands_involved_list = two_hands_features(test_loader,model_hands_involved, "hands_involved") #input_dim,config['hidden_dim_mapping']['hands_involved'],config['output_dim_mapping']["hands_involved"],"hands_involved")
-            # joined_hand_orientation_list = two_hands_features(test_loader,model_joined_hand_orientation,"joined_hand_orientation")#"input_dim,config['hidden_dim_mapping']['joined_hand_orientation'],config['output_dim_mapping']["joined_hand_orientation"],"joined_hand_orientation")
-            # relative_hand_height_list = two_hands_features(test_loader,model_relative_hand_height,'relative_hand_height') #input_dim,config['hidden_dim_mapping']['relative_hand_height'],config['output_dim_mapping']["relative_hand_height"],"relative_hand_height")
-            # hand_synchronization_list = two_hands_features(test_loader, model_hand_synchronization,'hand_synchronization')#input_dim,config['hidden_dim_mapping']['hand_synchronization'],config['output_dim_mapping']["hand_synchronization"],"hand_synchronization")
-
-            feature_vector =  right_arm_folded_list + right_forearm_orientation_list + right_hand_position_along_body_list + right_elbow_orientation_list + right_palm_position_list + right_fingers_joined_list + right_fingertips_orientation_list + right_finger_closeness_to_face_list + left_arm_folded_list + left_forearm_orientation_list + left_elbow_orientation_list + left_hand_position_along_body_list + left_fingertips_orientation_list + left_palm_position_list + left_fingers_joined_list + left_fingers_closeness_to_face_list + hands_involved_list + joined_hand_orientation_list + relative_hand_height_list + hand_synchronization_list
-            # print("feature_vector",feature_vector)
-            vector_list.append(feature_vector)
-            path_list.append(classification_dict[vid][img_idx])
-        # print("vector_list",len(vector_list))
-        feature_list.append(vector_list)
-        img_path.append(path_list)
-    labels = [] 
-    vid_name = []
-    for vid in classification_dict.keys():
-        labels.append(vid.split("_")[1])
-        vid_name.append(vid)
-    # Example DataFrame
-    seq_ip_data = {'vid_name': vid_name,
-            'feature_list': feature_list,
-            'labels': labels,
-            'img_path':img_path}
+def process_video(video_path, config, npy_base_dir, frame_tmp_base_dir, npy_dict, lock):
+    """Process a single video: extract frames, generate npy files, and update the dictionary."""
+    video_name = os.path.basename(video_path).split('.')[0].lower()
+    unique_tmp_dir = os.path.join(frame_tmp_base_dir, video_name)
+    os.makedirs(unique_tmp_dir, exist_ok=True)
     
-    if dataset_size == 'reduced':
-
-        original_list = seq_ip_data['feature_list']
-        vid_name = seq_ip_data['vid_name']
-        labels = seq_ip_data['labels']
-        original_img_path = seq_ip_data['img_path']
-        new_vid_list,new_img_path = [],[]
+    try:
+        keyframes = extract_start_end_frames_with_decrementing_threshold_function(video_path)
+        # clear_tmp_directory(directory_path=unique_tmp_dir)
+        extract_seq_of_frames(video_path, keyframes, unique_tmp_dir)
         
-        # Loop through the original list
-        for i in range(len(original_list)):
-            new_img_list = []
-            new_path_list = []
-            for j in range(len(original_list[i])):
-                # Append the element to new_list only if it is not the same as the previous one
-                if j == 0 or original_list[i][j] != original_list[i][j - 1]:
-                    new_img_list.append(original_list[i][j])
-                    new_path_list.append(original_img_path[i][j])
-            new_vid_list.constructappend(new_img_list)
-            new_img_path.append(new_path_list)
-        
-        # Output the new list without consecutive duplicates
-        # print(len(new_vid_list))
-        
-        seq_ip_data = {'vid_name': vid_name,
-                'feature_list': new_vid_list,
-                'labels': labels,
-                'img_path':new_img_path}
-
-        with open(save_path, 'wb') as f:
-            pickle.dump(seq_ip_data, f)
-    else:
-
-        with open(save_path, 'wb') as f:
-            pickle.dump(seq_ip_data, f)
-
-    # multi_inference.clear_gpu_memory()
-
-"""
-def construct_npy_dictionary(config,npy_base_dir,frame_tmp_dir,test_data_path,npy_pickle_path = 'npy_dict_all.pkl'):
-
-    """"
-    This code is to construct npy dictionary of with key as video_name and value as list of npy paths.
-    
-    """
-
-    npy_dict = {}
-    for Signers in os.listdir(test_data_path):
-        # for folders in os.listdir(os.path.join(test_data_path,Signers)):                 # Commented for ai4bharat Testing TODO : Change to GPT code to dynamically handle any directory structure
-            # if folders in videos_to_extract:
-            folders = ''
-            for video in os.listdir(os.path.join(test_data_path,Signers,folders)):
-                video_path = os.path.join(test_data_path,Signers,folders,video)
-    #             # print(video_path)
-                keyframes = extract_start_end_frames_with_decrementing_threshold_function(video_path) # For one video
-    #             # print(keyframes)
-                clear_tmp_directory(directory_path=frame_tmp_dir) 
-                extract_seq_of_frames(video_path ,keyframes,frame_tmp_dir)
+        for img in sorted(os.listdir(unique_tmp_dir), key=lambda x: int(x.split('.')[0])):
+            img_path = os.path.join(unique_tmp_dir, img)
+            npy_save_dir = os.path.join(npy_base_dir, video_name)
+            os.makedirs(npy_save_dir, exist_ok=True)
+            frame_no = extract_npy_files(config, img_path, npy_save_dir)
             
-                for img in sorted(os.listdir(frame_tmp_dir),key=lambda x: int(x.split('.')[0])):
-                    video_name = video
-                    img_path = os.path.join(frame_tmp_dir,img)
-                    npy_save_dir = os.path.join(npy_base_dir,(video_name.split('.')[0]).lower())
-                    os.makedirs(npy_save_dir,exist_ok=True)
-                    frame_no = extract_npy_files(config,img_path,npy_save_dir)
-                    if frame_no != None:
-                        key = video_name.split('.')[0].lower()
-                        if key not in npy_dict:
-                            npy_dict[key] = []
-                        # frame_no = (img_path.split('/')[-1]).split('.')[0]
-                        # print("Another loop",(img_path.split('/')[-1]).split('.')[0])                    
-                        npy_dict[key].append(f'{npy_save_dir}/{frame_no}.npy')
-                    # print("dict values",npy_dict)
-                    else:
-                        continue
+            if frame_no:
+                with lock:
+                    if video_name not in npy_dict:
+                        npy_dict[video_name] = []
+                    npy_dict[video_name].append(f'{npy_save_dir}/{frame_no}.npy')
+    finally:
+        shutil.rmtree(unique_tmp_dir)  # Clean up the temporary directory after use
 
-    #             break
+def construct_npy_dictionary(config, npy_base_dir, frame_tmp_base_dir, test_data_path, npy_pickle_path = 'npy_dict_all.pkl'):
+    """Construct npy dictionary with video_name as key and npy file paths as values."""
+    npy_dict = defaultdict(list)
+    lock = Lock()
 
+    video_paths = [
+        os.path.join(test_data_path, Signers, folders, video)
+        for Signers in os.listdir(test_data_path)
+        for folders in os.listdir(os.path.join(test_data_path,Signers))  # Replace with actual folder logic if needed
+        for video in os.listdir(os.path.join(test_data_path, Signers, folders))
+    ]
+    
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        futures = [
+            executor.submit(process_video, video_path, config, npy_base_dir, frame_tmp_base_dir, npy_dict, lock)
+            for video_path in video_paths
+        ]
+        for future in as_completed(futures):
+            future.result()  # Wait for all threads to complete
+    
     with open(npy_pickle_path, 'wb') as f:
-        pickle.dump(npy_dict, f)
-
-
-def construct_npy_dictionary_one_video_multithread(config,video_path):
-
-
-    # Extract keyframes for one video
-
-    keyframes = extract_start_end_frames_with_decrementing_threshold_function(video_path)
-    
-    pass 
+        pickle.dump(dict(npy_dict), f)
 
 
 
-
-
-def construct_npy_file(config,npy_base_dir,frame_tmp_dir,video_path,npy_pickle_path = 'npy_dict_all.pkl'):
-
-    npy_dict = {}
-
-    keyframes = extract_start_end_frames(video_path)
-    clear_tmp_directory(directory_path=frame_tmp_dir)
-    extract_seq_of_frames(video_path ,keyframes,frame_tmp_dir)
-
-    for img in sorted(os.listdir(frame_tmp_dir),key=lambda x: int(x.split('.')[0])):
-        video_name = video_path.split('/')[-1].split('.')[0].lower()
-        img_path = os.path.join(frame_tmp_dir,img)
-        npy_save_dir = os.path.join(npy_base_dir,(video_name.split('.')[0]).lower())
-        os.makedirs(npy_save_dir,exist_ok=True)
-        extract_npy_files(config,img_path,npy_save_dir)
-        key = video_name.split('.')[0].lower()
-        if key not in npy_dict:
-            npy_dict[key] = []
-        frame_no = (img_path.split('/')[-1]).split('.')[0]
-        # print("Another loop",(img_path.split('/')[-1]).split('.')[0])                    
-        npy_dict[key].append(f'{npy_save_dir}/{frame_no}.npy')
-        # print("dict values",npy_dict)
-
-    #             break
-
-    with open(npy_pickle_path, 'wb') as f:
-        pickle.dump(npy_dict, f)
 
 def balance_classes(df, target_column):
     # Determine the maximum count of samples in any class
