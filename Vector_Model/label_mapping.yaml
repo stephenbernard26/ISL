@@ -1,0 +1,360 @@
+dropout_prob: 0.5
+
+output_dim_mapping:
+
+  right_arm_folded: 3
+  right_forearm_orientation: 4
+  right_finger_closeness_to_face: 9
+  right_fingers_joined: 2
+  right_fingertips_orientation: 10
+  right_hand_position_along_body: 4
+  right_palm_position: 6
+  right_elbow_orientation: 4
+  left_arm_folded: 4
+  left_forearm_orientation: 4
+  left_elbow_orientation: 4
+  left_hand_position_along_body: 5
+  left_fingertips_orientation: 14
+  left_palm_position: 7
+  left_fingers_joined: 2
+  left_fingers_closeness_to_face: 7
+  hands_involved: 3
+  joined_hand_orientation: 4
+  relative_hand_height: 3
+  hand_synchronization: 3
+
+input_dim_mapping:
+
+  right_arm_folded: 4
+  right_forearm_orientation: 3
+  right_elbow_orientation: 18
+  right_hand_position_along_body: 10
+  right_fingertips_orientation: 6
+  right_palm_position: 7
+  right_fingers_joined: 11
+  right_finger_closeness_to_face: 20
+  left_arm_folded: 38 #36
+  left_forearm_orientation: 18
+  left_elbow_orientation: 18
+  left_hand_position_along_body: 13 #11
+  left_fingertips_orientation: 16
+  left_palm_position: 6
+  left_fingers_joined: 16
+  left_fingers_closeness_to_face: 20
+  hands_involved: 54 #52
+  joined_hand_orientation: 52
+  relative_hand_height: 52
+  hand_synchronization: 52
+
+hidden_dim_mapping:
+
+  right_arm_folded: [128,256,512,256,128]  #64
+  right_forearm_orientation: [64,128,256,512,256,128,64] #64
+  right_elbow_orientation: [128,128,256,512,256,128,128] #64
+  right_hand_position_along_body: [128,256,512,256,128] #64
+  right_fingertips_orientation: [128,256,512,256,128] #64
+  right_palm_position: [128,256,512,256,128] #64
+  right_fingers_joined: [512,512,512,512,512] #64
+  right_finger_closeness_to_face: [256,256,512,256,256]
+  left_arm_folded: [64,128,64]
+  left_forearm_orientation: [64,128,64]
+  left_elbow_orientation: [64,128,64]
+  left_hand_position_along_body: [64,128,64]
+  left_fingertips_orientation: [128,254,124]
+  left_palm_position: [64,128,64]
+  left_fingers_joined: [64,128,256,128,64]
+  left_fingers_closeness_to_face: [256,256,512,256,256]
+  hands_involved: [64,128,64]
+  joined_hand_orientation: [64,128,64]
+  relative_hand_height: [64,128,64]
+  hand_synchronization: [64,128,64]
+
+
+decoder:
+  right_elbow_orientation:
+    0: "horizontal"
+    1: "vertical"
+    2: "lowerdiagonal"
+    3: "upperdiagonal"
+
+  right_forearm_orientation:
+    0: "horizontal"
+    1: "vertical"
+    2: "lowerdiagonal"
+    3: "upperdiagonal"
+
+  right_arm_folded:
+    0: 'partiallyfolded'
+    1: 'folded'
+    2: 'rest'
+
+  right_fingers_joined:
+    0: 'joined'
+    1: 'notjoined'
+
+  right_palm_position:
+    0: "towards_body"
+    1: "upwards"
+    2: "away_from_body"
+    3: "downwards"
+    4: "towards_left"
+    5: "towards_right"
+    6: "each_other"
+
+  right_hand_position_along_body:
+    0: 'chest'
+    1: 'face'
+    2: 'abdomen'
+    3: 'belowabdomen'
+
+  right_fingertips_orientation:
+    0: 'open'
+    1: 'closed'
+    2: 'thumb_alone_open'
+    3: 'index_finger_open'
+    4: 'partially_joined'
+
+  right_finger_closeness_to_face:
+    0: "eyes"
+    1: "ears"
+    2: "nose"
+    3: "lips"
+    4: "chin"
+    5: "cheeks"
+    6: "none"
+    7: "hair"
+    8: "forehead"
+
+  left_arm_folded:
+    0: 'partiallyfolded'
+    1: 'folded'
+    2: 'rest'
+    3: 'stretched'
+
+  left_forearm_orientation:
+    0: "horizontal"
+    1: "vertical"
+    2: "lowerdiagonal"
+    3: "upperdiagonal"
+
+  left_elbow_orientation:
+    0: "horizontal"
+    1: "vertical"
+    2: "lowerdiagonal"
+    3: "upperdiagonal"
+
+  left_hand_position_along_body:
+    0: 'chest'
+    1: 'face'
+    2: 'abdomen'
+    3: 'belowabdomen'
+    4: 'neck'
+
+  left_fingertips_orientation:
+    0: 'open'
+    1: 'closed'
+    2: 'thumb_alone_open'
+    3: 'index_finger_open'
+    4: 'partially_open'
+    5: 'index_and_thumb_alone_open'
+    6: 'middle_and_index_open'
+    7: 'grip'
+    8: 'index_thumb_middle_cup_c'
+    9: 'index_thumb_middle_alone_open'
+    10: 'curved_closed'
+    11: 'fully_open'
+    12: 'index_and_thumb_C_open'
+    13: 'index_and_thumb_L_open'
+
+  left_fingers_joined:
+    0: 'joined'
+    1: 'notjoined'
+
+  left_palm_position:
+    0: "towards_body"
+    1: "upwards"
+    2: "away_from_body"
+    3: "downwards"
+    4: "towards_left"
+    5: "towards_right"
+    6: "each_other"
+
+  left_fingers_closeness_to_face:
+    0: "eyes"
+    1: "ears"
+    2: "chin"
+    3: "cheeks"
+    4: "none"
+    5: "hair"
+    6: "forehead"
+
+  hands_involved:
+    0: "one"
+    1: "two"
+    2: "none"
+
+  joined_hand_orientation:
+    0: "joined"
+    1: "notjoined"
+    2: "overlap"
+    3: "crossoverlap"
+
+  relative_hand_height:
+    0: "righthandabove"
+    1: "righthandbelow"
+    2: "none"
+
+  hand_synchronization:
+    0: "synchronous"
+    1: "asynchronous"
+    2: "rest"
+
+encoder:
+  right_elbow_orientation:
+    "horizontal": 0
+    "vertical": 1
+    "lowerdiagonal": 2
+    "upperdiagonal": 3
+
+  right_forearm_orientation:
+    "horizontal": 0
+    "vertical": 1
+    "lowerdiagonal": 2
+    "upperdiagonal": 3
+
+  right_arm_folded:
+    'partiallyfolded': 0
+    'partially_folded': 0
+    'folded': 1
+    'rest': 2
+
+  right_fingers_joined:
+    'joined': 0
+    'notjoined': 1
+
+  right_palm_position:
+    "towards_body": 0
+    "upwards": 1
+    "away_from_body": 2
+    "downwards": 3
+    "towards_left": 4
+    "towards_right": 5
+    "each_other": 6
+
+  right_hand_position_along_body:
+    'chest': 0
+    'face': 1
+    'abdomen': 2
+    'belowabdomen': 3
+
+  right_fingertips_orientation:
+    'open': 0
+    'closed': 1
+    'thumb_alone_open': 2
+    'index_finger_open': 3
+    'partially_open': 4
+    'index_and_thumb_alone_open': 5
+    # 'middle_and_index_open': 6
+    # 'grip': 7
+    # 'index_thumb_middle_cup_c': 8
+    # 'index_thumb_middle_alone_open': 9
+    'curved_closed': 6
+    'fully_open': 7
+    # 'index_and_thumb_C_open': 12
+    'pinch': 8
+    'partially_joined': 9
+
+
+  right_finger_closeness_to_face:
+    "eyes": 0
+    "ears": 1
+    "nose": 2
+    "lips": 3
+    "chin": 4
+    "cheeks": 5
+    "none": 6
+    "hair": 7
+    "forehead": 8
+
+  left_arm_folded:
+    'partiallyfolded': 0
+    'folded': 1
+    'rest': 2
+    'stretched': 3
+
+  left_forearm_orientation:
+    "horizontal": 0
+    "vertical": 1
+    "lowerdiagonal": 2
+    "upperdiagonal": 3
+
+  left_elbow_orientation:
+    "horizontal": 0
+    "vertical": 1
+    "lowerdiagonal": 2
+    "upperdiagonal": 3
+
+  left_hand_position_along_body:
+    'chest': 0
+    'face': 1
+    'abdomen': 2
+    'belowabdomen': 3
+    'neck': 4
+
+  left_fingertips_orientation:
+    'open': 0
+    'closed': 1
+    'thumb_alone_open': 2
+    'index_finger_open': 3
+    'partially_open': 4
+    'index_and_thumb_open': 5 #index_and_thumb_alone_open changed to index_and_thumb_open
+    'middle_and_index_open': 6
+    'grip': 7
+    'index_thumb_middle_cup_c': 8
+    'index_thumb_middle_alone_open': 9
+    'curved_closed': 10
+    'fully_open': 11
+    'index_and_thumb_C_open': 12
+
+  left_fingers_joined:
+    'joined': 0
+    'notjoined': 1
+
+  left_palm_position:
+    "towards_body": 0
+    "upwards": 1
+    "away_from_body": 2
+    "downwards": 3
+    "towards_left": 4
+    "towards_right": 5
+    "each_other": 6
+
+  left_fingers_closeness_to_face:
+    "eyes": 0
+    "ears": 1
+    "chin": 2
+    "cheeks": 3
+    "none": 4
+    "hair": 5
+    "forehead": 6
+
+  hands_involved:
+    "one": 0
+    "two": 1
+    "none": 2
+
+  joined_hand_orientation:
+    "joined": 0
+    "notjoined": 1
+    "overlap": 2
+    "crossoverlap": 3
+
+  relative_hand_height:
+    "right_hand_above": 0
+    "right_hand_below": 1
+    "none": 2
+
+  hand_synchronization:
+    "synchronous": 0
+    "asynchronous": 1
+    "rest": 2
