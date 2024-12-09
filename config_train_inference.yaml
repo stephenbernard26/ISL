@@ -1,0 +1,23 @@
+training:
+  csv_path : '/4TBHD/ISL/CodeBase/Normalized_Concat_Data/new_right_finger_closeness_to_face_concat.csv'
+  path_to_npy_files : '/4TBHD/ISL/data_preparation/test_blank_keypoints/Keypointsw/'
+  batch_size: 100
+  n_iters: 3000
+  input_dim : 104
+  hidden_dim : 64
+  output_dim : 9
+  num_epochs : 1000
+  learning_rate : 0.0001
+  model_name: 'right_finger_closeness_to_face'
+
+inference:
+  input_dim : 104
+  hidden_dim : 64
+  output_dim : 9
+  csv_path : '/4TBHD/ISL/CodeBase/Dataset/Test/test_dataset.csv'
+  checkpoint_path: '/4TBHD/ISL/vector_models/10kmodels/right_finger_closeness_to_face.h5'
+  excel_file_path : "./Test_Dataset_Prediction/right_finger_closeness_to_face.csv"
+
+left_hand_model_output_dim:
+
+  # Ea
