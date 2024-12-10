@@ -120,12 +120,12 @@ def calculate_classwise_accuracy(pred, actual):
 
 
 
-def extract_npy_files(config,frame_path,npy_save_dir):
+def extract_npy_files(config,frame,npy_save_dir,frame_count):
 
     mp_holistic = mp.solutions.holistic  # used to extract full body keypoints
 
 
-    frame_count = (frame_path.split('/')[-1]).split('.')[0]
+    # frame_count = (frame_path.split('/')[-1]).split('.')[0]
 
 
 
@@ -142,7 +142,6 @@ def extract_npy_files(config,frame_path,npy_save_dir):
     feature_extractor = Feature_Extraction(filters=feature_filters)
 
 
-    frame = cv2.imread(frame_path, cv2.IMREAD_COLOR)
     with mp_holistic.Holistic(min_detection_confidence=0.2, min_tracking_confidence=0.2) as holistic:
 
         frame, results = feature_extractor.mediapipe_detection(frame, holistic)
@@ -156,15 +155,10 @@ def extract_npy_files(config,frame_path,npy_save_dir):
             features = feature_extractor.extract_features(face, pose, left_hand, right_hand, frame_width, frame_height)
             features_old = features
 
-        # if np.sum(features[-4]) != 0.0:
-        #     npy_path = os.path.join(npy_save_dir, f"{frame_count}.npy")
-        #     np.save(npy_path, features)
-
-        # if np.sum(features[-4]) and np.sum(features[32:35]) != 0.0:  # Checking blured frames                
 
         print(features.shape)
         if np.sum(features[[26,29,32,35],:]) and np.sum(features[[42,45,48,51],:]) != 0.0:  # Checking blured frames                                
-
+            print("saving features")
 
             npy_path = os.path.join(npy_save_dir, f"{frame_count}.npy")
             np.save(npy_path, features)
@@ -266,26 +260,26 @@ class Vector_models():
             # Define model configurations
             self.models = {}
             self.model_configs = {
-                "right_fingertips_orientation": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/multi_people_models_v3/right_fingertips_orientation.h5",
-                "right_finger_closeness_to_face": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/multi_people_models_v3/right_finger_closeness_to_face.h5",
-                "right_fingers_joined": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/multi_people_models_v3/right_fingers_joined.h5",
-                "right_palm_position": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/multi_people_models_v3/right_palm_position.h5",
-                "right_elbow_orientation": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/multi_people_models_v3/right_elbow_orientation.h5",
-                "right_hand_position_along_body": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/multi_people_models_v3/right_hand_position_along_body.h5",
-                "right_forearm_orientation": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/multi_people_models_v3/right_forearm_orientation.h5",
-                "right_arm_folded": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/multi_people_models_v3/right_arm_folded.h5",
-                "hands_involved": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/two_hands_v1/hands_involved.h5",
-                "joined_hand_orientation": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/two_hands_v1/joined_hand_orientation.h5",
-                "relative_hand_height": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/two_hands_v1/relative_hand_height.h5",
-                "hand_synchronization": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/two_hands_v1/hand_synchronization.h5",
-                "left_arm_folded": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/left_v1/left_arm_folded.h5",
-                "left_forearm_orientation": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/left_v1/left_forearm_orientation.h5",
-                "left_elbow_orientation": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/left_v1/left_elbow_orientation.h5",
-                "left_hand_position_along_body": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/left_v1/left_hand_position_along_body.h5",
-                "left_fingertips_orientation": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/left_v1/left_fingertips_orientation.h5",
-                "left_palm_position": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/left_v1/left_palm_position.h5",
-                "left_fingers_joined": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/left_v1/left_fingers_joined.h5",
-                "left_fingers_closeness_to_face": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/left_v1/left_fingers_closeness_to_face.h5",
+                "right_fingertips_orientation": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/54keypoints/right_fingertips_orientation.h5",
+                "right_finger_closeness_to_face": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/54keypoints/right_finger_closeness_to_face.h5",
+                "right_fingers_joined": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/54keypoints/right_fingers_joined.h5",
+                "right_palm_position": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/54keypoints/right_palm_position.h5",
+                "right_elbow_orientation": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/54keypoints/right_elbow_orientation.h5",
+                "right_hand_position_along_body": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/54keypoints/right_hand_position_along_body.h5",
+                "right_forearm_orientation": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/54keypoints/right_forearm_orientation.h5",
+                "right_arm_folded": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/54keypoints/right_arm_folded.h5",
+                "hands_involved": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/54keypoints/hands_involved.h5",
+                "joined_hand_orientation": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/54keypoints/joined_hand_orientation.h5",
+                "relative_hand_height": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/54keypoints/relative_hand_height.h5",
+                "hand_synchronization": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/54keypoints/hand_synchronization.h5",
+                "left_arm_folded": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/54keypoints/left_arm_folded.h5",
+                "left_forearm_orientation": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/54keypoints/left_forearm_orientation.h5",
+                "left_elbow_orientation": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/54keypoints/left_elbow_orientation.h5",
+                "left_hand_position_along_body": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/54keypoints/left_hand_position_along_body.h5",
+                "left_fingertips_orientation": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/54keypoints/left_fingertips_orientation.h5",
+                "left_palm_position": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/54keypoints/left_palm_position.h5",
+                "left_fingers_joined": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/54keypoints/left_fingers_joined.h5",
+                "left_fingers_closeness_to_face": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/54keypoints/left_fingers_closeness_to_face.h5",
             }
 
 
@@ -293,14 +287,15 @@ class Vector_models():
 
         # Define models for each key in model_configs
         for model_name, path in self.model_configs.items():
+            print(model_name)
             input_dim = self.config['input_dim_mapping'][model_name]
             output_dim = self.config['output_dim_mapping'][model_name]
             hidden_dim_key = self.config['hidden_dim_mapping'][model_name]
 
             # Initialize the model and load the state dictionary
             if model_name.split('_')[0] == 'right':
-                model = FeedforwardNeuralNetModel(input_dim, hidden_dim_key, output_dim).to(device)
-                # model = FeedforwardNeuralNetModelLeftHand(input_dim * 2, hidden_dim_key, output_dim).to(device)  # For Shifted Orgin
+                # model = FeedforwardNeuralNetModel(input_dim, hidden_dim_key, output_dim).to(device)
+                model = FeedforwardNeuralNetModelLeftHand(input_dim * 2, hidden_dim_key, output_dim).to(device)  # For Shifted Orgin
                 model.load_state_dict(torch.load(path, map_location=device))
             else:
                 model = FeedforwardNeuralNetModelLeftHand(input_dim * 2, hidden_dim_key, output_dim).to(device)
@@ -318,7 +313,6 @@ class Vector_models():
         predictions_dict = model_prediction(model,test_loader)
         predictions_list = list(predictions_dict.values())
         return predictions_list
-
 
 
 
@@ -398,32 +392,33 @@ def dynamic_npy_read_v1(init_vector_models,keypoints_arrays,file_name,classifica
 
 
 
-
     # Code for non-shifted Orgin
 
-    if "left" in file_name:
-        for feature in keypoints_arrays:
-            selected_features = []
-            for key in config_keypoint['feature_indices'][file_name]:
-                # Construct the filter key from `filter_mapping`
-                filter_key = f"{key}_filter"
-                # Only add mapped values if the filter key exists in `filter_mapping`
-                if filter_key in config_keypoint['filter_mapping']:
-                    for item in config_keypoint['feature_indices'][file_name][key]:
-                        # Append mapped value if it exists in the filter
-                        if item in config_keypoint['filter_mapping'][filter_key]:
-                            selected_features.append(config_keypoint['filter_mapping'][filter_key][item])
-            selected_feature_list.append(feature[selected_features])
-        selected_feature_np = np.array(selected_feature_list)
-        selected_feature_flat = selected_feature_np.reshape(len(selected_feature_np),-1)
-        z_tensor = torch.tensor(selected_feature_flat, dtype=torch.float32)
-        test_data = torch.utils.data.TensorDataset(z_tensor)
-        test_loader = torch.utils.data.DataLoader(test_data, batch_size, shuffle=False)
-    else:
-        keypoints_arrays_np = np.array(keypoints_arrays)
-        z_tensor = torch.tensor(keypoints_arrays_np.reshape(len(keypoints_arrays_np),-1), dtype=torch.float32)
-        test_data = torch.utils.data.TensorDataset(z_tensor)
-        test_loader = torch.utils.data.DataLoader(test_data, batch_size, shuffle=False)
+    # if "right" in file_name:
+    for feature in keypoints_arrays:
+        selected_features = []
+        for key in config_keypoint['feature_indices'][file_name]:
+            # Construct the filter key from `filter_mapping`
+            filter_key = f"{key}_filter"
+            # Only add mapped values if the filter key exists in `filter_mapping`
+            if filter_key in config_keypoint['filter_mapping']:
+                for item in config_keypoint['feature_indices'][file_name][key]:
+                    # Append mapped value if it exists in the filter
+                    if item in config_keypoint['filter_mapping'][filter_key]:
+                        selected_features.append(config_keypoint['filter_mapping'][filter_key][item])
+        selected_feature_list.append(feature[selected_features])
+    selected_feature_np = np.array(selected_feature_list)
+    selected_feature_flat = selected_feature_np.reshape(len(selected_feature_np),-1)
+    z_tensor = torch.tensor(selected_feature_flat, dtype=torch.float32)
+    test_data = torch.utils.data.TensorDataset(z_tensor)
+    test_loader = torch.utils.data.DataLoader(test_data, batch_size, shuffle=False)
+    # else:
+    #     keypoints_arrays_np = np.array(keypoints_arrays)
+    #     print(len(keypoints_arrays_np))
+
+    #     z_tensor = torch.tensor(keypoints_arrays_np.reshape(len(keypoints_arrays_np),-1), dtype=torch.float32)
+    #     test_data = torch.utils.data.TensorDataset(z_tensor)
+    #     test_loader = torch.utils.data.DataLoader(test_data, batch_size, shuffle=False)
     
     prediction_list = init_vector_models.model_predict(file_name, test_loader)
     reconstructed_dict = {}
@@ -574,32 +569,25 @@ def construct_seq_dictionary(config,classification_dict,dataset_size,shift_orgin
 
 
 
-def process_video(video_path, config, npy_base_dir, frame_tmp_base_dir, npy_dict, lock):
+def process_video(video_path, config, npy_base_dir, npy_dict, lock):
     """Process a single video: extract frames, generate npy files, and update the dictionary."""
     video_name = os.path.basename(video_path).split('.')[0].lower()
-    unique_tmp_dir = os.path.join(frame_tmp_base_dir, video_name)
-    os.makedirs(unique_tmp_dir, exist_ok=True)
-    
-    try:
-        keyframes = extract_start_end_frames_with_decrementing_threshold_function(video_path)
-        # clear_tmp_directory(directory_path=unique_tmp_dir)
-        extract_seq_of_frames(video_path, keyframes, unique_tmp_dir)
-        
-        for img in sorted(os.listdir(unique_tmp_dir), key=lambda x: int(x.split('.')[0])):
-            img_path = os.path.join(unique_tmp_dir, img)
-            npy_save_dir = os.path.join(npy_base_dir, video_name)
-            os.makedirs(npy_save_dir, exist_ok=True)
-            frame_no = extract_npy_files(config, img_path, npy_save_dir)
-            
-            if frame_no:
-                with lock:
-                    if video_name not in npy_dict:
-                        npy_dict[video_name] = []
-                    npy_dict[video_name].append(f'{npy_save_dir}/{frame_no}.npy')
-    finally:
-        shutil.rmtree(unique_tmp_dir)  # Clean up the temporary directory after use
+    # unique_tmp_dir = os.path.join(frame_tmp_base_dir, video_name)
+    # os.makedirs(unique_tmp_dir, exist_ok=True)
 
-def construct_npy_dictionary(config, npy_base_dir, frame_tmp_base_dir, test_data_path, npy_pickle_path = 'npy_dict_all.pkl'):
+        
+    npy_save_dir = os.path.join(npy_base_dir, video_name)
+    os.makedirs(npy_save_dir,exist_ok=True)
+
+    try:
+        # keyframes = extract_start_end_frames_with_decrementing_threshold_function(video_path)
+        extract_seq_of_frames(config,video_path, npy_save_dir,lock,video_name,npy_dict)
+        
+        
+    finally:
+        print("Hola done")  # Clean up the temporary directory after use
+
+def construct_npy_dictionary(config, npy_base_dir, test_data_path, npy_pickle_path='test.pkl'):
     """Construct npy dictionary with video_name as key and npy file paths as values."""
     npy_dict = defaultdict(list)
     lock = Lock()
@@ -613,7 +601,7 @@ def construct_npy_dictionary(config, npy_base_dir, frame_tmp_base_dir, test_data
     
     with ThreadPoolExecutor(max_workers=4) as executor:
         futures = [
-            executor.submit(process_video, video_path, config, npy_base_dir, frame_tmp_base_dir, npy_dict, lock)
+            executor.submit(process_video, video_path, config, npy_base_dir, npy_dict, lock)
             for video_path in video_paths
         ]
         for future in as_completed(futures):
@@ -621,7 +609,6 @@ def construct_npy_dictionary(config, npy_base_dir, frame_tmp_base_dir, test_data
     
     with open(npy_pickle_path, 'wb') as f:
         pickle.dump(dict(npy_dict), f)
-
 
 
 

@@ -268,7 +268,7 @@ if __name__ == '__main__':
     #     print("File exists, skipping construct_npy_dictionary")
 
     # else:        
-    #     construct_npy_dictionary(config,npy_base_dir,frame_tmp_dir,video_dataset_path,seq_npy_dict)
+    #     construct_npy_dictionary(config,npy_base_dir,video_dataset_path,seq_npy_dict)
 
     # path_to_sequence_data = seq_npy_dict
 
