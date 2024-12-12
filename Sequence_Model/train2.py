@@ -57,7 +57,7 @@ def set_random_seed(random_seed):
 
 import wandb
 sweep_configuration = {
-    'method': 'grid',  # 'grid' or 'random'
+    'method': 'bayes',  # 'grid' or 'random'
     'metric': {
         'name': 'validation_accuracy',
         'goal': 'maximize'   
@@ -79,7 +79,7 @@ sweep_configuration = {
             'values':[50,100]
         },
         'model_name':{
-            'values':['LSTM']
+            'values':['LSTM','BiLSTM']
         }
     }
 }
@@ -104,10 +104,10 @@ def do_sweep():
 
     early_stopping = EarlyStopping(patience=5, min_delta=0.001)
 
-    input_size = 8
+    input_size = 20
     hidden_size = config.hidden_size
     num_layers = config.num_layers
-    output_size = 10
+    output_size = 50
     dropout = config.dropout
     model_name = config.model_name
 
@@ -225,18 +225,21 @@ def fit(model,loss_fn,optimizer,max_epoch,model_save_name):
             print(f"Early stopping at epoch {epoch+1}")
             break
 
-    # Test accuracy (after training completes or early stopping triggers)
-    test_acc ,_  = calculate_model_accuracy(model,loss_fn, test_dataloader,device)
+    # # Test accuracy (after training completes or early stopping triggers)
+    # test_acc ,_  = calculate_model_accuracy(model,loss_fn, test_dataloader,device)
     
-    print(f'Test Accuracy: {test_acc:.2f}%')
+    # print(f'Test Accuracy: {test_acc:.2f}%')
 
-    calculate_model_classwise_accuracy(model,loss_fn, test_dataloader,device,output_size)
-    # Save the model
-    # model_name = f"Model-HiddenSize-{hidden_size}_NumLayers-{num_layers}_Dropout-{dropout}"
-    torch.save(model.state_dict(), f'/4TBHD/ISL/CodeBase/Model_Dir/sign_models/{model_save_name}.h5')
+    # calculate_model_classwise_accuracy(model,loss_fn, test_dataloader,device,output_size)
+    # # Save the model
+    # # model_name = f"Model-HiddenSize-{hidden_size}_NumLayers-{num_layers}_Dropout-{dropout}"
+    # torch.save(model.state_dict(), f'/4TBHD/ISL/CodeBase/sign_models/{model_save_name}.h5')
 
-    print('Training complete.')
+    # print('Training complete.')
 
+def collate_fn(batch):
+    batch = [item for item in batch if item is not None]
+    return torch.utils.data.default_collate(batch)
 
 
 
@@ -251,55 +254,74 @@ if __name__ == '__main__':
 
     set_random_seed(42)
 
-    video_dataset_path = '/4TBHD/Janaghan/5sign_7video_5person'
-    experiment_name = '5sign_7video_5person'
+    video_dataset_path = '/4TBHD/ai4/ai4bharat_portrait_dataset/dataset'
+    experiment_name = 'include_260'
     # npy_dict = {}
     # # npy_dict = defaultdict(list)
     npy_base_dir = f"/4TBHD/ISL/CodeBase/Sequence_Model/tmp_npy_folder/{experiment_name}"
-    frame_tmp_dir = '/4TBHD/ISL/CodeBase/Sequence_Model/tmp/frames_tmp_1'
+    frame_tmp_dir = '/4TBHD/ISL/CodeBase/Sequence_Model/tmp/frames_tmp'
     seq_npy_dict = f'/4TBHD/ISL/CodeBase/Sequence_Model/{experiment_name}.pkl'
     os.makedirs(npy_base_dir,exist_ok=True)
 
     config = read_config('config.yaml')
 
-    # Comment the below code if your dataset is already converted to pickle file
-    # construct_npy_dictionary(config,npy_base_dir,frame_tmp_dir,video_dataset_path,seq_npy_dict)
 
 
+    # if os.path.exists(seq_npy_dict):
+    #     print("File exists, skipping construct_npy_dictionary")
 
-    path_to_sequence_data = seq_npy_dict
-    # path_to_sequence_data = '/4TBHD/ISL/CodeBase/seq_dataset.pkl'
+    # else:        
+    #     construct_npy_dictionary(config,npy_base_dir,video_dataset_path,seq_npy_dict)
+
+    # path_to_sequence_data = seq_npy_dict
 
 
+    # Uncomment the below if you want to run for a specific model
+    # path_to_sequence_data = '/4TBHD/ISL/CodeBase/Sequence_Model/include_260_aug.pkl'
 
     # if os.path.getsize(path_to_sequence_data) > 0:
     #     with open(path_to_sequence_data, 'rb') as f:
     #         classification_dict = pickle.load(f)
     # else:
     #     print("The file is empty.")
+    
+    # print((classification_dict["cindrella_thursday_4"]))
+
+    # print((classification_dict["cindrella_thursday_4_plus7rotation"].shape))
+
+    # print((classification_dict["cindrella_thursday_4"].shape))
+
+    # print(type(classification_dict["cindrella_thursday_4_plus7rotation"]))
 
 
-    # file_path_2 = f'/4TBHD/ISL/CodeBase/Sequence_Model/{experiment_name}_sequence_vector.pkl'
 
-    # # The code below is used to read the pickle file and make the seq_data_pickle file
-    # dataset_size = "Reduced" # Reduced/Expanded
-    # construct_seq_dictionary(config,classification_dict,dataset_size,save_path=file_path_2)
+    # file_path_2 = f'/4TBHD/ISL/CodeBase/Sequence_Model/{experiment_name}_reduced_sequence_vector.pkl'
 
-    # if os.path.getsize(file_path_2) > 0:
-    #     with open(file_path_2, 'rb') as f:
-    #         seq_ip_data = pickle.load(f)
-    # else:
-    #     print("The file is empty.")
+    file_path_2 = '/4TBHD/ISL/CodeBase/Sequence_Model/pickle_files/include/include_260_sequence_vector.pkl'
 
-    # path_to_sequence_vector = file_path_2
-    path_to_sequence_vector = '/4TBHD/ISL/CodeBase/Sequence_Model/pickle_files/5sign_7person_5video/5sign_9person_5video_seq_vector.pkl'
-    # path_to_sequence_vector = '/4TBHD/ISL/CodeBase/Sequence_Model/pickle_files/30_sign_vector_sequence_pkl/30_sign_seq_vector.pkl'clear
+
+    # if os.path.exists(file_path_2):
+    #     print("File exists, skipping construct_seq_dictionary")
+    # else:       
+    #     dataset_size = "reduced" # reduced/Expanded
+    #     shift_orgin = False
+    #     construct_seq_dictionary(config,classification_dict,dataset_size,shift_orgin,save_path=file_path_2)
+
+    if os.path.getsize(file_path_2) > 0:
+        with open(file_path_2, 'rb') as f:
+            seq_ip_data = pickle.load(f)
+    else:
+        print("The file is empty.")
+
+    path_to_sequence_vector = file_path_2
+    # path_to_sequence_vector = '/4TBHD/ISL/CodeBase/Sequence_Model/pickle_files/last_20_sign_vector_sequence_pkl/last_20_seq_vector_reduced.pkl'
+    # path_to_sequence_vector = '/4TBHD/ISL/CodeBase/Sequence_Model/pickle_files/30_sign_vector_sequence_pkl/30_sign_seq_vector.pkl'
 
 
     df = pd.read_pickle(path_to_sequence_vector)
     df_seq_ip = pd.DataFrame(df)
 
-    print(df_seq_ip)
+    print('column names',df_seq_ip.columns)
 
 
 
@@ -309,10 +331,31 @@ if __name__ == '__main__':
 
     X = df_seq_ip['feature_list']  # Selecting the input features
     y = df_seq_ip['labels']                  # Target labels
-    print(list(set(y)))
+    if any(element is None for element in X):
+        print("The list contains NoneType elements.")
+    else:
+        print("The list does not contain any NoneType elements.")
+    # X_train, X_tmp, y_train, y_tmp = train_test_split( X, y, test_size=0.2, random_state=42, stratify=y)
+    # X_val, X_test, y_val, y_test = train_test_split( X_tmp, y_tmp, test_size=0.5, random_state=42, stratify=y_tmp)
+
+
+    # The below code is created when the split was uneven and could not be possible
 
     X_train, X_tmp, y_train, y_tmp = train_test_split( X, y, test_size=0.2, random_state=42, stratify=y)
-    X_val, X_test, y_val, y_test = train_test_split( X_tmp, y_tmp, test_size=0.5, random_state=42, stratify=y_tmp)
+    # X_val, X_test, y_val, y_test = train_test_split( X_tmp, y_tmp, test_size=0.5, random_state=42, stratify=y_tmp)
+
+
+
+
+    # print(X_train)
+    # print(X_val)
+    # print(X_test)
+
+    # from itertools import zip_longest
+
+    # with open('data_split.txt', 'w') as f:
+    #     for a, b, c in zip_longest(X_train, X_val, X_test, fillvalue=None):
+    #         f.write(f"{a}, {b}, {c}\n")
 
 
     # train, tmp = train_test_split(df_seq_ip, test_size=0.2,random_state=42)
@@ -330,14 +373,28 @@ if __name__ == '__main__':
 
 
 
+    # train_dataset = SequenceClassificationDataset(X_train,y_train)
+    # val_dataset = SequenceClassificationDataset(X_val,y_val)
+    # test_dataset = SequenceClassificationDataset(X_test,y_test)
+
+
+    # The below code for uneven split
+
+
+    print("invalid label", X_train[1084])
+
     train_dataset = SequenceClassificationDataset(X_train,y_train)
-    val_dataset = SequenceClassificationDataset(X_val,y_val)
-    test_dataset = SequenceClassificationDataset(X_test,y_test)
+    val_dataset = SequenceClassificationDataset(X_tmp,y_tmp)
 
 
-    train_dataloader = torch.utils.data.DataLoader(train_dataset)
+
+    train_dataloader = torch.utils.data.DataLoader(train_dataset,t)
     val_dataloader = torch.utils.data.DataLoader(val_dataset)
-    test_dataloader = torch.utils.data.DataLoader(test_dataset)
+    # test_dataloader = torch.utils.data.DataLoader(test_dataset)
+
+
+
+
 
 
     # # Comment the below when doing the sweep
@@ -350,12 +407,12 @@ if __name__ == '__main__':
     input_size = 20
     hidden_size = 256
     num_layers = 1
-    output_size = 5
+    output_size = 262
     dropout = 0.2
     max_epoch = 1000
     learning_rate = 0.0001
     
-    seq_model = 'LSTM'
+    seq_model = 'BiLSTM'
 
     model = Classifier(seq_model,input_size, hidden_size, num_layers, output_size ,dropout)
     model.to(device)
