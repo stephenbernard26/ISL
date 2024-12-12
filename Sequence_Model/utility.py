@@ -18,6 +18,9 @@ import numpy as np
 import sys
 import mediapipe as mp
 from collections import Counter
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from threading import Lock
+from collections import defaultdict
 # from tqdm import tqdm
 parent_dir = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
 print(parent_dir)
@@ -116,12 +119,12 @@ def calculate_classwise_accuracy(pred, actual):
 
 
 
-def extract_npy_files(config,frame_path,npy_save_dir):
+def extract_npy_files(config,frame,npy_save_dir,frame_count):
 
     mp_holistic = mp.solutions.holistic  # used to extract full body keypoints
 
 
-    frame_count = (frame_path.split('/')[-1]).split('.')[0]
+    # frame_count = (frame_path.split('/')[-1]).split('.')[0]
 
 
 
@@ -138,7 +141,6 @@ def extract_npy_files(config,frame_path,npy_save_dir):
     feature_extractor = Feature_Extraction(filters=feature_filters)
 
 
-    frame = cv2.imread(frame_path, cv2.IMREAD_COLOR)
     with mp_holistic.Holistic(min_detection_confidence=0.2, min_tracking_confidence=0.2) as holistic:
 
         frame, results = feature_extractor.mediapipe_detection(frame, holistic)
@@ -152,15 +154,10 @@ def extract_npy_files(config,frame_path,npy_save_dir):
             features = feature_extractor.extract_features(face, pose, left_hand, right_hand, frame_width, frame_height)
             features_old = features
 
-        # if np.sum(features[-4]) != 0.0:
-        #     npy_path = os.path.join(npy_save_dir, f"{frame_count}.npy")
-        #     np.save(npy_path, features)
-
-        # if np.sum(features[-4]) and np.sum(features[32:35]) != 0.0:  # Checking blured frames                
 
         print(features.shape)
         if np.sum(features[[26,29,32,35],:]) and np.sum(features[[42,45,48,51],:]) != 0.0:  # Checking blured frames                                
-
+            print("saving features")
 
             npy_path = os.path.join(npy_save_dir, f"{frame_count}.npy")
             np.save(npy_path, features)
@@ -210,8 +207,6 @@ def model_prediction(model,test_loader):
     return predictions_dict
 
 
-
-
 class Vector_models():
     def __init__(self,shift_orgin):
         
@@ -234,26 +229,26 @@ class Vector_models():
 
             self.models = {}
             self.model_configs = {
-                "right_fingertips_orientation": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/shifted_origin/right_hand/right_fingertips_orientation.h5",
-                "right_finger_closeness_to_face": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/shifted_origin/right_hand/right_finger_closeness_to_face.h5",
-                "right_fingers_joined": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/shifted_origin/right_hand/right_fingers_joined.h5",
-                "right_palm_position": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/shifted_origin/right_hand/right_palm_position.h5",
-                "right_elbow_orientation": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/shifted_origin/right_hand/right_elbow_orientation.h5",
-                "right_hand_position_along_body": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/shifted_origin/right_hand/right_hand_position_along_body.h5",
-                "right_forearm_orientation": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/shifted_origin/right_hand/right_forearm_orientation.h5",
-                "right_arm_folded": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/shifted_origin/right_hand/right_arm_folded.h5",
-                "hands_involved": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/shifted_origin/two_hands/hands_involved.h5",
-                "joined_hand_orientation": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/shifted_origin/two_hands/joined_hand_orientation.h5",
-                "relative_hand_height": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/shifted_origin/two_hands/relative_hand_height.h5",
-                "hand_synchronization": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/shifted_origin/two_hands/hand_synchronization.h5",
-                "left_arm_folded": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/shifted_origin/left_hand/left_arm_folded.h5",
-                "left_forearm_orientation": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/shifted_origin/left_hand/left_forearm_orientation.h5",
-                "left_elbow_orientation": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/shifted_origin/left_hand/left_elbow_orientation.h5",
-                "left_hand_position_along_body": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/shifted_origin/left_hand/left_hand_position_along_body.h5",
-                "left_fingertips_orientation": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/shifted_origin/left_hand/left_fingertips_orientation.h5",
-                "left_palm_position": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/shifted_origin/left_hand/left_palm_position.h5",
-                "left_fingers_joined": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/shifted_origin/left_hand/left_fingers_joined.h5",
-                "left_fingers_closeness_to_face": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/shifted_origin/left_hand/left_fingers_closeness_to_face.h5",
+                "right_fingertips_orientation": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/54keypoints_shifted_origin/right_fingertips_orientation.h5",
+                "right_finger_closeness_to_face": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/54keypoints_shifted_origin/right_finger_closeness_to_face.h5",
+                "right_fingers_joined": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/54keypoints_shifted_origin/right_fingers_joined.h5",
+                "right_palm_position": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/54keypoints_shifted_origin/right_palm_position.h5",
+                "right_elbow_orientation": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/54keypoints_shifted_origin/right_elbow_orientation.h5",
+                "right_hand_position_along_body": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/54keypoints_shifted_origin/right_hand_position_along_body.h5",
+                "right_forearm_orientation": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/54keypoints_shifted_origin/right_forearm_orientation.h5",
+                "right_arm_folded": "/4TBHD/ISL/CodeBase/tmp_model_dir/54_shifted_origin/right_arm_folded.h5",
+                "hands_involved": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/54keypoints_shifted_origin/hands_involved.h5",
+                "joined_hand_orientation": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/54keypoints_shifted_origin/joined_hand_orientation.h5",
+                "relative_hand_height": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/54keypoints_shifted_origin/relative_hand_height.h5",
+                "hand_synchronization": "/4TBHD/ISL/CodeBase/tmp_model_dir/54_shifted_origin/hand_synchronization.h5",
+                "left_arm_folded": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/54keypoints_shifted_origin/left_arm_folded.h5",
+                "left_forearm_orientation": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/54keypoints_shifted_origin/left_forearm_orientation.h5",
+                "left_elbow_orientation": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/54keypoints_shifted_origin/left_elbow_orientation.h5",
+                "left_hand_position_along_body": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/54keypoints_shifted_origin/left_hand_position_along_body.h5",
+                "left_fingertips_orientation": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/54keypoints_shifted_origin/left_fingertips_orientation.h5",
+                "left_palm_position": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/54keypoints_shifted_origin/left_palm_position.h5",
+                "left_fingers_joined": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/54keypoints_shifted_origin/left_fingers_joined.h5",
+                "left_fingers_closeness_to_face": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/54keypoints_shifted_origin/left_fingers_closeness_to_face.h5",
             }
 
 
@@ -262,26 +257,26 @@ class Vector_models():
             # Define model configurations
             self.models = {}
             self.model_configs = {
-                "right_fingertips_orientation": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/multi_people_models_v3/right_fingertips_orientation.h5",
-                "right_finger_closeness_to_face": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/multi_people_models_v3/right_finger_closeness_to_face.h5",
-                "right_fingers_joined": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/multi_people_models_v3/right_fingers_joined.h5",
-                "right_palm_position": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/multi_people_models_v3/right_palm_position.h5",
-                "right_elbow_orientation": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/multi_people_models_v3/right_elbow_orientation.h5",
-                "right_hand_position_along_body": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/multi_people_models_v3/right_hand_position_along_body.h5",
-                "right_forearm_orientation": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/multi_people_models_v3/right_forearm_orientation.h5",
-                "right_arm_folded": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/multi_people_models_v3/right_arm_folded.h5",
-                "hands_involved": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/two_hands_v1/hands_involved.h5",
-                "joined_hand_orientation": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/two_hands_v1/joined_hand_orientation.h5",
-                "relative_hand_height": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/two_hands_v1/relative_hand_height.h5",
-                "hand_synchronization": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/two_hands_v1/hand_synchronization.h5",
-                "left_arm_folded": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/left_v1/left_arm_folded.h5",
-                "left_forearm_orientation": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/left_v1/left_forearm_orientation.h5",
-                "left_elbow_orientation": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/left_v1/left_elbow_orientation.h5",
-                "left_hand_position_along_body": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/left_v1/left_hand_position_along_body.h5",
-                "left_fingertips_orientation": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/left_v1/left_fingertips_orientation.h5",
-                "left_palm_position": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/left_v1/left_palm_position.h5",
-                "left_fingers_joined": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/left_v1/left_fingers_joined.h5",
-                "left_fingers_closeness_to_face": "/4TBHD/ISL/CodeBase/Model_Dir/vector_models/left_v1/left_fingers_closeness_to_face.h5",
+                "right_fingertips_orientation": "/4TBHD/ISL/CodeBase/tmp_model_dir/54_without_shifted_origin/right_fingertips_orientation.h5",
+                "right_finger_closeness_to_face": "/4TBHD/ISL/CodeBase/tmp_model_dir/54_without_shifted_origin/right_finger_closeness_to_face.h5",
+                "right_fingers_joined": "/4TBHD/ISL/CodeBase/tmp_model_dir/54_without_shifted_origin/right_fingers_joined.h5",
+                "right_palm_position": "/4TBHD/ISL/CodeBase/tmp_model_dir/54_without_shifted_origin/right_palm_position.h5",
+                "right_elbow_orientation": "/4TBHD/ISL/CodeBase/tmp_model_dir/54_without_shifted_origin/right_elbow_orientation.h5",
+                "right_hand_position_along_body": "/4TBHD/ISL/CodeBase/tmp_model_dir/54_without_shifted_origin/right_hand_position_along_body.h5",
+                "right_forearm_orientation": "/4TBHD/ISL/CodeBase/tmp_model_dir/54_without_shifted_origin/right_forearm_orientation.h5",
+                "right_arm_folded": "/4TBHD/ISL/CodeBase/tmp_model_dir/54_without_shifted_origin/right_arm_folded.h5",
+                "hands_involved": "/4TBHD/ISL/CodeBase/tmp_model_dir/54_without_shifted_origin/hands_involved.h5",
+                "joined_hand_orientation": "/4TBHD/ISL/CodeBase/tmp_model_dir/54_without_shifted_origin/joined_hand_orientation.h5",
+                "relative_hand_height": "/4TBHD/ISL/CodeBase/tmp_model_dir/54_without_shifted_origin/relative_hand_height.h5",
+                "hand_synchronization": "/4TBHD/ISL/CodeBase/tmp_model_dir/54_without_shifted_origin/hand_synchronization.h5",
+                "left_arm_folded": "/4TBHD/ISL/CodeBase/tmp_model_dir/54_without_shifted_origin/left_arm_folded.h5",
+                "left_forearm_orientation": "/4TBHD/ISL/CodeBase/tmp_model_dir/54_without_shifted_origin/left_forearm_orientation.h5",
+                "left_elbow_orientation": "/4TBHD/ISL/CodeBase/tmp_model_dir/54_without_shifted_origin/left_elbow_orientation.h5",
+                "left_hand_position_along_body": "/4TBHD/ISL/CodeBase/tmp_model_dir/54_without_shifted_origin/left_hand_position_along_body.h5",
+                "left_fingertips_orientation": "/4TBHD/ISL/CodeBase/tmp_model_dir/54_without_shifted_origin/left_fingertips_orientation.h5",
+                "left_palm_position": "/4TBHD/ISL/CodeBase/tmp_model_dir/54_without_shifted_origin/left_palm_position.h5",
+                "left_fingers_joined": "/4TBHD/ISL/CodeBase/tmp_model_dir/54_without_shifted_origin/left_fingers_joined.h5",
+                "left_fingers_closeness_to_face": "/4TBHD/ISL/CodeBase/tmp_model_dir/54_without_shifted_origin/left_fingers_closeness_to_face.h5",
             }
 
 
@@ -289,14 +284,15 @@ class Vector_models():
 
         # Define models for each key in model_configs
         for model_name, path in self.model_configs.items():
+            print(model_name)
             input_dim = self.config['input_dim_mapping'][model_name]
             output_dim = self.config['output_dim_mapping'][model_name]
             hidden_dim_key = self.config['hidden_dim_mapping'][model_name]
 
             # Initialize the model and load the state dictionary
             if model_name.split('_')[0] == 'right':
-                model = FeedforwardNeuralNetModel(input_dim, hidden_dim_key, output_dim).to(device)
-                # model = FeedforwardNeuralNetModelLeftHand(input_dim * 2, hidden_dim_key, output_dim).to(device)  # For Shifted Orgin
+                # model = FeedforwardNeuralNetModel(input_dim, hidden_dim_key, output_dim).to(device)
+                model = FeedforwardNeuralNetModelLeftHand(input_dim * 2, hidden_dim_key, output_dim).to(device)  # For Shifted Orgin
                 model.load_state_dict(torch.load(path, map_location=device))
             else:
                 model = FeedforwardNeuralNetModelLeftHand(input_dim * 2, hidden_dim_key, output_dim).to(device)
@@ -417,29 +413,32 @@ def dynamic_npy_read_v1(init_vector_models,keypoints_arrays,file_name,classifica
 
     # Code for non-shifted Orgin
 
-    if "left" in file_name:
-        for feature in keypoints_arrays:
-            selected_features = []
-            for key in config_keypoint['feature_indices'][file_name]:
-                # Construct the filter key from `filter_mapping`
-                filter_key = f"{key}_filter"
-                # Only add mapped values if the filter key exists in `filter_mapping`
-                if filter_key in config_keypoint['filter_mapping']:
-                    for item in config_keypoint['feature_indices'][file_name][key]:
-                        # Append mapped value if it exists in the filter
-                        if item in config_keypoint['filter_mapping'][filter_key]:
-                            selected_features.append(config_keypoint['filter_mapping'][filter_key][item])
-            selected_feature_list.append(feature[selected_features])
-        selected_feature_np = np.array(selected_feature_list)
-        selected_feature_flat = selected_feature_np.reshape(len(selected_feature_np),-1)
-        z_tensor = torch.tensor(selected_feature_flat, dtype=torch.float32)
-        test_data = torch.utils.data.TensorDataset(z_tensor)
-        test_loader = torch.utils.data.DataLoader(test_data, batch_size, shuffle=False)
-    else:
-        keypoints_arrays_np = np.array(keypoints_arrays)
-        z_tensor = torch.tensor(keypoints_arrays_np.reshape(len(keypoints_arrays_np),-1), dtype=torch.float32)
-        test_data = torch.utils.data.TensorDataset(z_tensor)
-        test_loader = torch.utils.data.DataLoader(test_data, batch_size, shuffle=False)
+    # if "right" in file_name:
+    for feature in keypoints_arrays:
+        selected_features = []
+        for key in config_keypoint['feature_indices'][file_name]:
+            # Construct the filter key from `filter_mapping`
+            filter_key = f"{key}_filter"
+            # Only add mapped values if the filter key exists in `filter_mapping`
+            if filter_key in config_keypoint['filter_mapping']:
+                for item in config_keypoint['feature_indices'][file_name][key]:
+                    # Append mapped value if it exists in the filter
+                    if item in config_keypoint['filter_mapping'][filter_key]:
+                        selected_features.append(config_keypoint['filter_mapping'][filter_key][item])
+        selected_feature_list.append(feature[selected_features])
+    selected_feature_np = np.array(selected_feature_list)
+    print("selected_feature_np",len(selected_feature_np))
+    selected_feature_flat = selected_feature_np.reshape(len(selected_feature_np),-1)
+    z_tensor = torch.tensor(selected_feature_flat, dtype=torch.float32)
+    test_data = torch.utils.data.TensorDataset(z_tensor)
+    test_loader = torch.utils.data.DataLoader(test_data, batch_size, shuffle=False)
+    # else:
+    #     keypoints_arrays_np = np.array(keypoints_arrays)
+    #     print(len(keypoints_arrays_np))
+
+    #     z_tensor = torch.tensor(keypoints_arrays_np.reshape(len(keypoints_arrays_np),-1), dtype=torch.float32)
+    #     test_data = torch.utils.data.TensorDataset(z_tensor)
+    #     test_loader = torch.utils.data.DataLoader(test_data, batch_size, shuffle=False)
     
     prediction_list = init_vector_models.model_predict(file_name, test_loader)
     reconstructed_dict = {}
@@ -461,11 +460,11 @@ def construct_seq_dictionary(config,classification_dict,dataset_size,shift_orgin
     with open('/4TBHD/ISL/CodeBase/config.yaml', 'r') as file:
         config_keypoint = yaml.safe_load(file)
     #-------------------------------------------------------#
-    # flat_path_list = [item for sublist in classification_dict.values() for item in sublist] # list of ndarray
+    flat_path_list = [item for sublist in classification_dict.values() for item in sublist] # list of ndarray
     for sublist in classification_dict.keys():
-        print((sublist))
+        # print((sublist))
         break
-    
+    # print(flat_path_list)
     if shift_orgin:
         keypoints_arrays = [shift_keypoints_to_new_orgin(path) for path in flat_path_list]
 
@@ -473,7 +472,7 @@ def construct_seq_dictionary(config,classification_dict,dataset_size,shift_orgin
         # keypoints_arrays = [np.load(path) for path in flat_path_list] # Og
         keypoints_arrays = [path for path in flat_path_list]   # Dec 6 update
 
-    print(keypoints_arrays[0])
+    # print(keypoints_arrays[0])
 
     file_names = [
         "right_arm_folded",
@@ -546,7 +545,7 @@ def construct_seq_dictionary(config,classification_dict,dataset_size,shift_orgin
     labels = [] 
     vid_name = []
     for vid in classification_dict.keys():
-        labels.append(vid.split("_")[-2])   # Later Kindly change to 1  ##### Remember ########################
+        labels.append(vid.split("_")[1])   # Later Kindly change to 1  ##### Remember ########################
         vid_name.append(vid)
     # Example DataFrame
     seq_ip_data = {'vid_name': vid_name,
@@ -750,88 +749,77 @@ construct
     # multi_inference.clear_gpu_memory()
 
 """
-def construct_npy_dictionary(config,npy_base_dir,frame_tmp_dir,test_data_path,npy_pickle_path = 'npy_dict_all.pkl'):
 
-    """"
-    This code is to construct npy dictionary of with key as video_name and value as list of npy paths.
-    
+def extract_seq_of_frames(config,video_path  ,npy_save_dir,lock,video_name,npy_dict):
     """
+    This function extracts the sequence of frames from start and 
+    the end of the keyframe
+    """
+    cap = cv2.VideoCapture(video_path)
+    frame_count = 1
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+        # if frame_count >= key_frames[0] and frame_count <= key_frames[-1]:
 
-    npy_dict = {}
-    for Signers in os.listdir(test_data_path):
-        # for folders in os.listdir(os.path.join(test_data_path,Signers)):                 # Commented for ai4bharat Testing TODO : Change to GPT code to dynamically handle any directory structure
-            # if folders in videos_to_extract:
-            folders = ''
-            for video in os.listdir(os.path.join(test_data_path,Signers,folders)):
-                video_path = os.path.join(test_data_path,Signers,folders,video)
-    #             # print(video_path)
-                keyframes = extract_start_end_frames_with_decrementing_threshold_function(video_path) # For one video
-    #             # print(keyframes)
-                clear_tmp_directory(directory_path=frame_tmp_dir) 
-                extract_seq_of_frames(video_path ,keyframes,frame_tmp_dir)
-            
-                for img in sorted(os.listdir(frame_tmp_dir),key=lambda x: int(x.split('.')[0])):
-                    video_name = video
-                    img_path = os.path.join(frame_tmp_dir,img)
-                    npy_save_dir = os.path.join(npy_base_dir,(video_name.split('.')[0]).lower())
-                    os.makedirs(npy_save_dir,exist_ok=True)
-                    frame_no = extract_npy_files(config,img_path,npy_save_dir)
-                    if frame_no != None:
-                        key = video_name.split('.')[0].lower()
-                        if key not in npy_dict:
-                            npy_dict[key] = []
-                        # frame_no = (img_path.split('/')[-1]).split('.')[0]
-                        # print("Another loop",(img_path.split('/')[-1]).split('.')[0])                    
-                        npy_dict[key].append(f'{npy_save_dir}/{frame_no}.npy')
-                    # print("dict values",npy_dict)
-                    else:
-                        continue
+        # Instead of saving , directly giving to extract npy function
+        frame_no = extract_npy_files(config,frame,npy_save_dir,frame_count)
 
-    #             break
+        if frame_no:
+            with lock:
+                if video_name not in npy_dict:
+                    npy_dict[video_name] = []
+                npy_dict[video_name].append(f'{npy_save_dir}/{frame_no}.npy')
 
-    with open(npy_pickle_path, 'wb') as f:
-        pickle.dump(npy_dict, f)
+        # if frame_count > key_frames[-1]:
+        #     break
+        frame_count += 1
 
+    # Release the video capture object
+    cap.release()
 
-def construct_npy_dictionary_one_video_multithread(config,video_path):
+def process_video(video_path, config, npy_base_dir, npy_dict, lock):
+    """Process a single video: extract frames, generate npy files, and update the dictionary."""
+    video_name = os.path.basename(video_path).split('.')[0].lower()
+    # unique_tmp_dir = os.path.join(frame_tmp_base_dir, video_name)
+    # os.makedirs(unique_tmp_dir, exist_ok=True)
 
+        
+    npy_save_dir = os.path.join(npy_base_dir, video_name)
+    os.makedirs(npy_save_dir,exist_ok=True)
 
-    # Extract keyframes for one video
+    try:
+        # keyframes = extract_start_end_frames_with_decrementing_threshold_function(video_path)
+        extract_seq_of_frames(config,video_path, npy_save_dir,lock,video_name,npy_dict)
 
-    keyframes = extract_start_end_frames_with_decrementing_threshold_function(video_path)
+        
+    finally:
+        print("Hola done")  # Clean up the temporary directory after use
+
+def construct_npy_dictionary(config, npy_base_dir, test_data_path, npy_pickle_path='test.pkl'):
+    """Construct npy dictionary with video_name as key and npy file paths as values."""
+    npy_dict = defaultdict(list)
+    lock = Lock()
+
+    video_paths = [
+        os.path.join(test_data_path, folders, video)
+        # for Signers in os.listdir(test_data_path)
+        for folders in os.listdir(os.path.join(test_data_path))  # Replace with actual folder logic if needed
+        for video in os.listdir(os.path.join(test_data_path, folders))
+    ]
     
-    pass 
-
-
-
-
-
-def construct_npy_file(config,npy_base_dir,frame_tmp_dir,video_path,npy_pickle_path = 'npy_dict_all.pkl'):
-
-    npy_dict = {}
-
-    keyframes = extract_start_end_frames(video_path)
-    clear_tmp_directory(directory_path=frame_tmp_dir)
-    extract_seq_of_frames(video_path ,keyframes,frame_tmp_dir)
-
-    for img in sorted(os.listdir(frame_tmp_dir),key=lambda x: int(x.split('.')[0])):
-        video_name = video_path.split('/')[-1].split('.')[0].lower()
-        img_path = os.path.join(frame_tmp_dir,img)
-        npy_save_dir = os.path.join(npy_base_dir,(video_name.split('.')[0]).lower())
-        os.makedirs(npy_save_dir,exist_ok=True)
-        extract_npy_files(config,img_path,npy_save_dir)
-        key = video_name.split('.')[0].lower()
-        if key not in npy_dict:
-            npy_dict[key] = []
-        frame_no = (img_path.split('/')[-1]).split('.')[0]
-        # print("Another loop",(img_path.split('/')[-1]).split('.')[0])                    
-        npy_dict[key].append(f'{npy_save_dir}/{frame_no}.npy')
-        # print("dict values",npy_dict)
-
-    #             break
-
+    with ThreadPoolExecutor(max_workers=32) as executor:
+        futures = [
+            executor.submit(process_video, video_path, config, npy_base_dir, npy_dict, lock)
+            for video_path in video_paths
+        ]
+        for future in as_completed(futures):
+            future.result()  # Wait for all threads to complete
+    
     with open(npy_pickle_path, 'wb') as f:
-        pickle.dump(npy_dict, f)
+        pickle.dump(dict(npy_dict), f)
+
 
 def balance_classes(df, target_column):
     # Determine the maximum count of samples in any class
@@ -851,3 +839,62 @@ def balance_classes(df, target_column):
     # Combine balanced dataframes
     balanced_df = pd.concat(balanced_dfs).reset_index(drop=True)
     return balanced_df
+
+
+def crop_frame_for_processing(frame, predefined_width=1291, predefined_height=1080, margin=500, min_detection_confidence=0.2):
+    """
+
+    Author: Cindrella S K
+
+    Crop a frame based on shoulder detection or retain original if conditions are met.
+
+    Args:
+        frame (numpy.ndarray): Input image frame.
+        predefined_width (int): Predefined width for cropping.
+        predefined_height (int): Predefined height for cropping.
+        margin (int): Margin to add around detected shoulders.
+        min_detection_confidence (float): Minimum detection confidence for Mediapipe Holistic.
+
+    Returns:
+        numpy.ndarray: Cropped or retained frame for further processing.
+    """
+    mp_holistic = mp.solutions.holistic
+
+    # Check if frame matches predefined dimensions
+    height, width, _ = frame.shape
+    if width == predefined_width and height == predefined_height:
+        print(f"Frame matches predefined dimensions ({predefined_width}x{predefined_height}). Retaining original frame.")
+        return frame
+
+    # Detect shoulders using Mediapipe Holistic
+    with mp_holistic.Holistic(static_image_mode=True, min_detection_confidence=min_detection_confidence) as holistic:
+        results = holistic.process(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+        if results.pose_landmarks:
+            left_shoulder = results.pose_landmarks.landmark[mp_holistic.PoseLandmark.LEFT_SHOULDER]
+            right_shoulder = results.pose_landmarks.landmark[mp_holistic.PoseLandmark.RIGHT_SHOULDER]
+
+            if left_shoulder.visibility >= min_detection_confidence and right_shoulder.visibility >= min_detection_confidence:
+                # Calculate cropping boundary
+                left_x = int(left_shoulder.x * width)
+                right_x = int(right_shoulder.x * width)
+                shoulder_width = right_x - left_x
+                overall_width = max(predefined_width, shoulder_width + (2 * margin))
+
+                # Center cropping horizontally
+                center_x = (left_x + right_x) // 2
+                x_start = max(0, center_x - overall_width // 2)
+                x_end = min(width, x_start + overall_width)
+
+                # Center cropping vertically
+                y_top = max(0, (height - predefined_height) // 2)
+                y_bottom = min(height, y_top + predefined_height)
+
+                # Crop the frame
+                cropped_frame = frame[y_top:y_bottom, x_start:x_end]
+
+                print(f"Frame cropped: {cropped_frame.shape}")
+                return cropped_frame
+
+    # Shoulders not detected
+    print("Shoulders not detected. Retaining original frame.")
+    return frame

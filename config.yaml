@@ -99,7 +99,7 @@ feature_indices:
     left_hand: [0, 1, 2, 4, 5, 6, 8, 9, 10, 12, 13, 14, 16, 17, 18, 20]
 
   left_hand_position_along_body:
-    pose: [11,12,15,16,23,24]
+    pose: [11,12,13,23,24]
     left_hand: [0,4,8,12,16,20]
     face: [175]
 
@@ -123,7 +123,7 @@ feature_indices:
 
   right_arm_folded:
     pose: [12, 14, 16]
-    # right_hand : [0] #, 4, 8, 12, 16, 20]
+    right_hand : [0] #, 4, 8, 12, 16, 20]
 
   right_finger_closeness_to_face:
     right_hand : [0, 4, 8, 12, 16, 20]
@@ -138,7 +138,7 @@ feature_indices:
 
   right_hand_position_along_body:
     right_hand: [0, 4, 8, 12, 16, 20]
-    pose : [12,14,16,23,24]
+    pose : [12,14,16 , 23,24]
     face: [175]
 
   right_palm_position:
@@ -151,7 +151,7 @@ feature_indices:
 
   hands_involved:
     face: [4, 13, 68, 93, 151, 175, 207, 298, 427, 454, 33, 133, 362, 263]
-    pose: [11, 12, 13, 14, 15, 16, 23,24]
+    pose: [11, 12, 13, 14, 15, 16] # ,23,24]
     left_hand: [0, 1, 2, 4, 5, 6, 8, 9, 10, 12, 13, 14, 16, 17, 18, 20]
     right_hand: [0 , 1, 2, 4, 5, 6, 8, 9, 10, 12, 13, 14, 16, 17, 18, 20]
 
@@ -163,7 +163,7 @@ feature_indices:
 
   hand_synchronization:
     face: [4, 13, 68, 93, 151, 175, 207, 298, 427, 454, 33, 133, 362, 263]
-    pose: [11, 12, 13, 14, 15, 16] 
+    pose: [11, 12, 13, 14, 15, 16] #,23, 24]
     left_hand: [0, 1, 2, 4, 5, 6, 8, 9, 10, 12, 13, 14, 16, 17, 18, 20]
     right_hand: [0 , 1, 2, 4, 5, 6, 8, 9, 10, 12, 13, 14, 16, 17, 18, 20]
 

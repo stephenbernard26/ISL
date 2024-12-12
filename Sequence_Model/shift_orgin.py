@@ -15,7 +15,8 @@ def shift_keypoints_to_new_orgin(npy_path):
     """
 
     # Load the .npy file
-    data = np.load(npy_path)
+    # data = np.load(npy_path)
+    data = npy_path
     missing_indices = [i for i in [14, 15, 20, 21] if data[i] is None]
     if missing_indices:
         print(f"{npy_path} is missing points at indices: {missing_indices}")

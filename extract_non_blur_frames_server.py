@@ -120,7 +120,9 @@ def extract_start_end_frames_with_decrementing_threshold_function(video_path, in
     return []
 
 
-def extract_seq_of_frames(video_path ,key_frames ,frame_tmp_dir):
+
+
+def extract_seq_of_frames(config,video_path  ,npy_save_dir,lock,video_name,npy_dict):
     """
     This function extracts the sequence of frames from start and 
     the end of the keyframe
@@ -131,13 +133,19 @@ def extract_seq_of_frames(video_path ,key_frames ,frame_tmp_dir):
         ret, frame = cap.read()
         if not ret:
             break
-        if frame_count >= key_frames[0] and frame_count <= key_frames[-1]:
-            # if check_non_blur_frames(frame_no_path=frame_count):
-            # Save the frame
-            output_file = f"{frame_tmp_dir}/{frame_count}.jpg"
-            cv2.imwrite(output_file, frame)
-        if frame_count > key_frames[-1]:
-            break
+        # if frame_count >= key_frames[0] and frame_count <= key_frames[-1]:
+
+        # Instead of saving , directly giving to extract npy function
+        frame_no = extract_npy_files(config,frame,npy_save_dir,frame_count)
+
+        if frame_no:
+            with lock:
+                if video_name not in npy_dict:
+                    npy_dict[video_name] = []
+                npy_dict[video_name].append(f'{npy_save_dir}/{frame_no}.npy')
+
+        # if frame_count > key_frames[-1]:
+        #     break
         frame_count += 1
 
     # Release the video capture object

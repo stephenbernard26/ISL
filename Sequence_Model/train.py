@@ -249,10 +249,10 @@ if __name__ == '__main__':
     else:
         device = torch.device('cpu')
 
-    set_random_seed(0)
+    set_random_seed(42)
 
-    video_dataset_path = '/4TBHD/ISL/vid35_itel50'
-    experiment_name = 'vid35_itel50'
+    video_dataset_path = '/4TBHD/include_50'
+    experiment_name = 'ai4b_50'
     # npy_dict = {}
     # # npy_dict = defaultdict(list)
     npy_base_dir = f"/4TBHD/ISL/CodeBase/Sequence_Model/tmp_npy_folder/{experiment_name}"
@@ -268,13 +268,13 @@ if __name__ == '__main__':
     #     print("File exists, skipping construct_npy_dictionary")
 
     # else:        
-    #     construct_npy_dictionary(config,npy_base_dir,frame_tmp_dir,video_dataset_path,seq_npy_dict)
+    #     construct_npy_dictionary(config,npy_base_dir,video_dataset_path,seq_npy_dict)
 
     # path_to_sequence_data = seq_npy_dict
 
 
     # Uncomment the below if you want to run for a specific model
-    path_to_sequence_data = '/4TBHD/ISL/CodeBase/Sequence_Model/vid35_itel50_aug_og.pkl'
+    path_to_sequence_data = '/4TBHD/ISL/CodeBase/Data_Augmentation/ai4b_50_aug.pkl'
 
     if os.path.getsize(path_to_sequence_data) > 0:
         with open(path_to_sequence_data, 'rb') as f:
@@ -282,12 +282,19 @@ if __name__ == '__main__':
     else:
         print("The file is empty.")
     
-    # print(type(classification_dict.values()))
+    # print((classification_dict["cindrella_thursday_4"]))
+
+    # print((classification_dict["cindrella_thursday_4_plus7rotation"].shape))
+
+    # print((classification_dict["cindrella_thursday_4"].shape))
+
+    # print(type(classification_dict["cindrella_thursday_4_plus7rotation"]))
+
 
 
     # file_path_2 = f'/4TBHD/ISL/CodeBase/Sequence_Model/{experiment_name}_reduced_sequence_vector.pkl'
 
-    file_path_2 = '/4TBHD/ISL/CodeBase/Sequence_Model/vid35_itel50_aug_seq_vector.pkl'
+    file_path_2 = '/4TBHD/ISL/CodeBase/Data_Augmentation/ai4b_50_aug_seq_vector(new_vector_model).pkl'
 
 
     if os.path.exists(file_path_2):
@@ -311,7 +318,7 @@ if __name__ == '__main__':
     df = pd.read_pickle(path_to_sequence_vector)
     df_seq_ip = pd.DataFrame(df)
 
-    print(df_seq_ip)
+    print(df_seq_ip.columns)
 
 
 
@@ -319,8 +326,9 @@ if __name__ == '__main__':
     # features = df["feature_list"]
 
 
-    X = df_seq_ip['vid_name']  # Selecting the input features
+    X = df_seq_ip['feature_list']  # Selecting the input features
     y = df_seq_ip['labels']                  # Target labels
+    print(y)
 
     X_train, X_tmp, y_train, y_tmp = train_test_split( X, y, test_size=0.2, random_state=42, stratify=y)
     X_val, X_test, y_val, y_test = train_test_split( X_tmp, y_tmp, test_size=0.5, random_state=42, stratify=y_tmp)

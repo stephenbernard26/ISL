@@ -67,7 +67,6 @@ label_mapping:
   49: "winter"
 
 
-# The below is for non-shifted orgin
 
 output_dim_mapping:
 
@@ -75,7 +74,7 @@ output_dim_mapping:
   right_forearm_orientation: 4
   right_finger_closeness_to_face: 9
   right_fingers_joined: 2
-  right_fingertips_orientation: 5
+  right_fingertips_orientation: 10
   right_hand_position_along_body: 4
   right_palm_position: 6
   right_elbow_orientation: 4
@@ -83,7 +82,7 @@ output_dim_mapping:
   left_forearm_orientation: 4
   left_elbow_orientation: 4
   left_hand_position_along_body: 5
-  left_fingertips_orientation: 13
+  left_fingertips_orientation: 14
   left_palm_position: 7
   left_fingers_joined: 2
   left_fingers_closeness_to_face: 7
@@ -94,37 +93,37 @@ output_dim_mapping:
 
 input_dim_mapping:
 
-  right_arm_folded: 104
-  right_forearm_orientation: 104
-  right_elbow_orientation: 104
-  right_hand_position_along_body: 104
-  right_fingertips_orientation: 104
-  right_palm_position: 104
-  right_fingers_joined: 104
-  right_finger_closeness_to_face: 104
-  left_arm_folded: 36
+  right_arm_folded: 4
+  right_forearm_orientation: 3
+  right_elbow_orientation: 18
+  right_hand_position_along_body: 12 # nw model
+  right_fingertips_orientation: 6
+  right_palm_position: 7
+  right_fingers_joined: 11
+  right_finger_closeness_to_face: 20
+  left_arm_folded: 38 #36
   left_forearm_orientation: 18
   left_elbow_orientation: 18
-  left_hand_position_along_body: 11
+  left_hand_position_along_body: 12 #11
   left_fingertips_orientation: 16
   left_palm_position: 6
   left_fingers_joined: 16
   left_fingers_closeness_to_face: 20
-  hands_involved: 52
+  hands_involved: 52 #54
   joined_hand_orientation: 52
   relative_hand_height: 52
-  hand_synchronization: 52
+  hand_synchronization: 52 #54
 
 hidden_dim_mapping:
 
-  right_arm_folded: 64
-  right_forearm_orientation: 64
-  right_elbow_orientation: 64
-  right_hand_position_along_body: 64
-  right_fingertips_orientation: 64
-  right_palm_position: 64
-  right_fingers_joined: 64
-  right_finger_closeness_to_face: 64
+  right_arm_folded: [128,256,512,256,128]  #64
+  right_forearm_orientation: [64,128,256,512,256,128,64] #64
+  right_elbow_orientation: [128,128,256,512,256,128,128] #64
+  right_hand_position_along_body: [128,256,512,256,128] #64
+  right_fingertips_orientation: [128,256,512,256,128] #64
+  right_palm_position: [128,256,512,256,128] #64
+  right_fingers_joined: [512,512,512,512,512] #64
+  right_finger_closeness_to_face: [256,256,512,256,256]
   left_arm_folded: [64,128,64]
   left_forearm_orientation: [64,128,64]
   left_elbow_orientation: [64,128,64]
@@ -137,6 +136,79 @@ hidden_dim_mapping:
   joined_hand_orientation: [64,128,64]
   relative_hand_height: [64,128,64]
   hand_synchronization: [64,128,64]
+
+
+
+# The below is for non-shifted orgin
+
+# output_dim_mapping:
+
+#   right_arm_folded: 3
+#   right_forearm_orientation: 4
+#   right_finger_closeness_to_face: 9
+#   right_fingers_joined: 2
+#   right_fingertips_orientation: 5
+#   right_hand_position_along_body: 4
+#   right_palm_position: 6
+#   right_elbow_orientation: 4
+#   left_arm_folded: 4
+#   left_forearm_orientation: 4
+#   left_elbow_orientation: 4
+#   left_hand_position_along_body: 5
+#   left_fingertips_orientation: 13
+#   left_palm_position: 7
+#   left_fingers_joined: 2
+#   left_fingers_closeness_to_face: 7
+#   hands_involved: 3
+#   joined_hand_orientation: 4
+#   relative_hand_height: 3
+#   hand_synchronization: 3
+
+# input_dim_mapping:
+
+#   right_arm_folded: 104
+#   right_forearm_orientation: 104
+#   right_elbow_orientation: 104
+#   right_hand_position_along_body: 104
+#   right_fingertips_orientation: 104
+#   right_palm_position: 104
+#   right_fingers_joined: 104
+#   right_finger_closeness_to_face: 104
+#   left_arm_folded: 36
+#   left_forearm_orientation: 18
+#   left_elbow_orientation: 18
+#   left_hand_position_along_body: 11
+#   left_fingertips_orientation: 16
+#   left_palm_position: 6
+#   left_fingers_joined: 16
+#   left_fingers_closeness_to_face: 20
+#   hands_involved: 52
+#   joined_hand_orientation: 52
+#   relative_hand_height: 52
+#   hand_synchronization: 52
+
+# hidden_dim_mapping:
+
+#   right_arm_folded: 64
+#   right_forearm_orientation: 64
+#   right_elbow_orientation: 64
+#   right_hand_position_along_body: 64
+#   right_fingertips_orientation: 64
+#   right_palm_position: 64
+#   right_fingers_joined: 64
+#   right_finger_closeness_to_face: 64
+#   left_arm_folded: [64,128,64]
+#   left_forearm_orientation: [64,128,64]
+#   left_elbow_orientation: [64,128,64]
+#   left_hand_position_along_body: [64,128,64]
+#   left_fingertips_orientation: [128,254,124]
+#   left_palm_position: [64,128,64]
+#   left_fingers_joined: [64,128,64]
+#   left_fingers_closeness_to_face: [64,128,64]
+#   hands_involved: [64,128,64]
+#   joined_hand_orientation: [64,128,64]
+#   relative_hand_height: [64,128,64]
+#   hand_synchronization: [64,128,64]
 
 
 # # The below is for shifted orgin
