@@ -1,0 +1,43 @@
+# Ignoring Specific Directories
+AI4Bharat/
+Backup_Files/
+__pycache__/
+Data_Augmentation/
+frames_tmp_thread/
+test_mult_all/
+test_tmp/
+tmp/
+tmp_model_dir/
+tmp_npy_folder_thread/
+
+# Ignoring Temp Directories in Subdirectories
+Sequence_Model/__pycache__/
+Sequence_Model/tmp/
+Sequence_Model/tmp_npy_folder/
+Sequence_Model/wandb/
+
+# Ignoring Generated or Augmented Data
+Sequence_Model/augmented_data/
+Sequence_Model/pickle_files/
+
+# Ignoring Model Directories
+Model_Dir/
+Vector_Model/
+
+# Ignoring Certain Python Files
+preprocess_new.py
+preprocess_new_copy.py
+Sequence_Model/feature_model_inference.py
+Sequence_Model/inference_single_video.py
+Sequence_Model/inference.py
+Sequence_Model/load_model_gpu.py
+Sequence_Model/test_v1.py
+Sequence_Model/test.py
+Sequence_Model/train copy.py
+Sequence_Model/utility_v1.py
+
+# Pickle files
+Sequence_Model/pickle_files/
+
+seq_dataset.pkl
+*.pkl  
