@@ -91,3 +91,33 @@ For any questions or further details, please reach out to the project maintainer
 
     1. Stephen L 
     2. Sandeep Kumar Suresh
+
+## Team Members
+      1. Stephen L
+      2. Sandeep Kumar Suresh
+      3. Cindrella S K
+      4. Harini Kumar
+      5. Janagan
+      6. Rounit
+
+## Contributions
+`Stephen L:` \
+Conceptualized the ISL pipeline.
+Implemented the image-level neural network for vector representations.
+Optimized code for performance.
+Contributed to data preparation.\
+`Sandeep Kumar Suresh:`\
+Developed the video-level neural network for sign detection.
+Designed and implemented the image processing pipeline.
+Optimized code for efficiency.
+Contributed to data preparation.\
+`Cindrella S K:`\
+Contributed to data preparation.
+Currently working on enhancing the performance of neural networks for vector representations.\
+`Harini Kumar:`
+Focused on data preparation.\
+`Janagan:`
+Focused on data preparation.\
+`Rounit:`
+Contributed to data preparation.
+Developed components of the image processing pipeline, specifically extracting keypoints from images.
